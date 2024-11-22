@@ -1,0 +1,66 @@
+import datetime
+import itertools
+
+class LibraryItem:
+    id_iter = itertools.count(1)  # Iterator for unique IDs
+    
+    def __init__(self, title, author, category, item_type):
+        self.item_code = f"LIB{next(self.id_iter):04d}"  # Unique code for each item
+        self.title = title
+        self.author = author
+        self.category = category
+        self.item_type = item_type
+        self.is_checked_out = False
+        self.due_date = None
+
+    def __str__(self):
+        return f"{self.item_code} - {self.title} by {self.author} ({self.item_type})"
+
+class Library:
+    def __init__(self):
+        self.items = []
+        self.overdue_fines_per_day = 1.0  # Fine per day for overdue items
+
+    def add_item(self, title, author, category, item_type):
+        new_item = LibraryItem(title, author, category, item_type)
+        self.items.append(new_item)
+        print(f"Added {new_item}")
+
+    def search_items(self, **kwargs):
+        results = []
+        for item in self.items:
+            match = True
+            for key, value in kwargs.items():
+                if getattr(item, key, None) != value:
+                    match = False
+                    break
+            if match:
+                results.append(item)
+        return results
+
+    def check_out_item(self, item_code):
+        for item in self.items:
+            if item.item_code == item_code and not item.is_checked_out:
+                item.is_checked_out = True
+                item.due_date = datetime.datetime.now() + datetime.timedelta(days=14)  # 2 weeks checkout period
+                print(f"Checked out {item.title}, due back on {item.due_date}")
+                return
+        print(f"Item {item_code} is not available for checkout.")
+
+    def return_item(self, item_code):
+        for item in self.items:
+            if item.item_code == item_code and item.is_checked_out:
+                item.is_checked_out = False
+                due_date = item.due_date
+                item.due_date = None
+                if datetime.datetime.now() > due_date:
+                    overdue_days = (datetime.datetime.now() - due_date).days
+                    fine = overdue_days * self.overdue_fines_per_day
+                    print(f"Returned {item.title} with a fine of ${fine:.2f} for {overdue_days} overdue days.")
+                else:
+                    print(f"Returned {item.title} on time.")
+                return
+        print(f"Item {item_code} was not checked out.")
+
+  
+
