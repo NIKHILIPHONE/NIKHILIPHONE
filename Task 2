@@ -1,3 +1,5 @@
+Developing a python program to manage a library resource such as books,magzine and dvds.
+
 import datetime
 import itertools
 
